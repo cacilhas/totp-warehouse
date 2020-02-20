@@ -3,19 +3,25 @@ package totp
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
+
+	"github.com/hgfischer/go-otp"
 )
 
 type OTP interface {
 	Issuer() string
 	User() string
+	Length() uint8
 	Secret() string
+	Token() string
 	OriginalURI() string
 }
 
-type otp struct {
+type pogo struct {
 	issuer string
 	user   string
+	length uint8
 	secret string
 	uri    *url.URL
 }
@@ -43,28 +49,51 @@ func Import(code string) (OTP, error) {
 		return nil, fmt.Errorf("secret not supplied")
 	}
 
-	return &otp{
+	maybeLength := query["length"]
+	if len(maybeLength) == 0 {
+		maybeLength = []string{"6"}
+	}
+	var length int
+	if length, err = strconv.Atoi(maybeLength[0]); err != nil {
+		length = 6
+	}
+
+	return &pogo{
 		issuer: issuer,
 		user:   user,
+		length: uint8(length),
 		secret: secret[0],
 		uri:    uri,
 	}, nil
 }
 
-func (otp otp) Issuer() string {
-	return otp.issuer
+func (pogo pogo) Issuer() string {
+	return pogo.issuer
 }
 
-func (otp otp) User() string {
-	return otp.user
+func (pogo pogo) User() string {
+	return pogo.user
 }
 
-func (otp otp) Secret() string {
-	return otp.secret
+func (pogo pogo) Length() uint8 {
+	return pogo.length
 }
 
-func (otp otp) OriginalURI() string {
-	return otp.uri.String()
+func (pogo pogo) Secret() string {
+	return pogo.secret
+}
+
+func (pogo pogo) OriginalURI() string {
+	return pogo.uri.String()
+}
+
+func (pogo pogo) Token() string {
+	totp := otp.TOTP{
+		Secret:         pogo.secret,
+		Length:         pogo.length,
+		IsBase32Secret: true,
+	}
+	return totp.Now().Get()
 }
 
 func getUser(path string) (string, string) {

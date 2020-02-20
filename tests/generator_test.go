@@ -22,13 +22,16 @@ func TestGenerator(t *testing.T) {
 			if user := got.User(); user != "batalema@cacilhas" {
 				t.Fatalf("expected batalema@cacilhas, got %v", user)
 			}
+			if length := got.Length(); length != 6 {
+				t.Fatalf("expected 6, got %v", length)
+			}
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
 			}
 		})
 
-		t.Run("issuer reset", func(t *testing.T) {
-			uri := "otpauth://totp/Kode%20Code:batalema@cacilhas?secret=ABCDABCD&issuer=My+Issuer"
+		t.Run("issuer and length supplied", func(t *testing.T) {
+			uri := "otpauth://totp/Kode%20Code:batalema@cacilhas?secret=ABCDABCD&issuer=My+Issuer&length=8"
 			if got, err = totp.Import(uri); err != nil {
 				t.Fatalf("unexpected error %v", err)
 			}
@@ -37,6 +40,9 @@ func TestGenerator(t *testing.T) {
 			}
 			if user := got.User(); user != "batalema@cacilhas" {
 				t.Fatalf("expected batalema@cacilhas, got %v", user)
+			}
+			if length := got.Length(); length != 8 {
+				t.Fatalf("expected 8, got %v", length)
 			}
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
