@@ -9,13 +9,20 @@ import (
 	"github.com/hgfischer/go-otp"
 )
 
+// OTP interface for OTP pogo
 type OTP interface {
+	// Issuer returns the service issuer
 	Issuer() string
+	// User returns the service user
 	User() string
+	// Length returns the secret length in digits
 	Length() uint8
+	// Secret the secret's B32
 	Secret() string
+	// Token returns the current TOTP token
 	Token() string
-	OriginalURI() string
+	// URI the URI used to supply the OTP data
+	URI() string
 }
 
 type pogo struct {
@@ -26,6 +33,7 @@ type pogo struct {
 	uri    *url.URL
 }
 
+// Import imports OTP data from URI
 func Import(code string) (OTP, error) {
 	var uri *url.URL
 	var err error
@@ -83,7 +91,7 @@ func (pogo pogo) Secret() string {
 	return pogo.secret
 }
 
-func (pogo pogo) OriginalURI() string {
+func (pogo pogo) URI() string {
 	return pogo.uri.String()
 }
 

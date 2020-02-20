@@ -28,6 +28,9 @@ func TestGenerator(t *testing.T) {
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
 			}
+			if value := got.URI(); value != uri {
+				t.Fatalf("expected %v, got %v", uri, value)
+			}
 		})
 
 		t.Run("issuer and length supplied", func(t *testing.T) {
@@ -46,6 +49,9 @@ func TestGenerator(t *testing.T) {
 			}
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
+			}
+			if value := got.URI(); value != uri {
+				t.Fatalf("expected %v, got %v", uri, value)
 			}
 		})
 	})
