@@ -32,10 +32,22 @@ func TestReader(t *testing.T) {
 
 	t.Run("ReadTotpFromScreen", func(t *testing.T) {
 		t.Run("Hello World", func(t *testing.T) {
-			if err := openbrowser("fixtures/hello.png"); err != nil {
+			var cmd *exec.Cmd
+			var err error
+			if cmd, err = openbrowser("fixtures/hello.png"); err != nil {
 				t.Fatalf("could not open fixture: %v", err)
 			}
-			time.Sleep(time.Second * 1)
+			defer func() {
+				signal := os.Interrupt
+				if runtime.GOOS == "windows" {
+					signal = os.Kill
+				}
+				cmd.Process.Signal(signal)
+				cmd.Process.Kill()
+				cmd.Process.Wait()
+			}()
+			sleep, _ := time.ParseDuration("200ms")
+			time.Sleep(sleep)
 			if got, err := totp.ReadTotpFromScreen(); got != "Hello, World!" {
 				t.Fatalf("expected Hello, World!, got %v - error: %v", got, err)
 			}
@@ -43,17 +55,20 @@ func TestReader(t *testing.T) {
 	})
 }
 
-func openbrowser(url string) error {
+func openbrowser(url string) (*exec.Cmd, error) {
+	var cmd *exec.Cmd
 	var err error
+
 	switch runtime.GOOS {
 	case "linux":
-		err = exec.Command("xdg-open", url).Start()
+		cmd = exec.Command("xdg-open", url)
 	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
 	case "darwin":
-		err = exec.Command("open", url).Start()
+		cmd = exec.Command("open", url)
 	default:
-		err = fmt.Errorf("unsupported platform")
+		return nil, fmt.Errorf("unsupported platform")
 	}
-	return err
+	err = cmd.Start()
+	return cmd, err
 }
