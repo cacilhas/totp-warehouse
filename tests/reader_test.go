@@ -34,18 +34,10 @@ func TestReader(t *testing.T) {
 		t.Run("Hello World", func(t *testing.T) {
 			var cmd *exec.Cmd
 			var err error
-			if cmd, err = openbrowser("fixtures/hello.png"); err != nil {
+			if cmd, err = startcommand("fixtures/hello.png"); err != nil {
 				t.Fatalf("could not open fixture: %v", err)
 			}
-			defer func() {
-				signal := os.Interrupt
-				if runtime.GOOS == "windows" {
-					signal = os.Kill
-				}
-				cmd.Process.Signal(signal)
-				cmd.Process.Kill()
-				cmd.Process.Wait()
-			}()
+			defer killprocess(cmd.Process)
 			sleep, _ := time.ParseDuration("200ms")
 			time.Sleep(sleep)
 			if got, err := totp.ReadTotpFromScreen(); got != "Hello, World!" {
@@ -55,7 +47,7 @@ func TestReader(t *testing.T) {
 	})
 }
 
-func openbrowser(url string) (*exec.Cmd, error) {
+func startcommand(url string) (*exec.Cmd, error) {
 	var cmd *exec.Cmd
 	var err error
 
@@ -71,4 +63,14 @@ func openbrowser(url string) (*exec.Cmd, error) {
 	}
 	err = cmd.Start()
 	return cmd, err
+}
+
+func killprocess(proc *os.Process) {
+	signal := os.Interrupt
+	if runtime.GOOS == "windows" {
+		signal = os.Kill
+	}
+	proc.Signal(signal)
+	proc.Kill()
+	proc.Wait()
 }
