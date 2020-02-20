@@ -21,8 +21,8 @@ type OTP interface {
 	Secret() string
 	// Token returns the current TOTP token
 	Token() string
-	// URI the URI used to supply the OTP data
-	URI() string
+	// String the URI used to supply the OTP data
+	String() string
 }
 
 type pogo struct {
@@ -91,7 +91,7 @@ func (pogo pogo) Secret() string {
 	return pogo.secret
 }
 
-func (pogo pogo) URI() string {
+func (pogo pogo) String() string {
 	return pogo.uri.String()
 }
 

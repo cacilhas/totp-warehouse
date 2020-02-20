@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cacilhas/totp-warehouse/totp"
@@ -28,7 +29,7 @@ func TestGenerator(t *testing.T) {
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
 			}
-			if value := got.URI(); value != uri {
+			if value := fmt.Sprintf("%v", got); value != uri {
 				t.Fatalf("expected %v, got %v", uri, value)
 			}
 		})
@@ -50,7 +51,7 @@ func TestGenerator(t *testing.T) {
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
 			}
-			if value := got.URI(); value != uri {
+			if value := fmt.Sprintf("%v", got); value != uri {
 				t.Fatalf("expected %v, got %v", uri, value)
 			}
 		})
