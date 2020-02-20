@@ -58,5 +58,15 @@ func TestStorage(t *testing.T) {
 				}
 			})
 		})
+
+		t.Run("delete OTP", func(t *testing.T) {
+			if err := storage.DeleteOTP("myuser@Another"); err == nil {
+				if got, err := storage.ListOTPKeys(); len(got) != 1 || err != nil {
+					t.Fatalf("unexpected list or error: %v / %v", got, err)
+				}
+			} else {
+				t.Fatalf("unexpected error %v", err)
+			}
+		})
 	})
 }

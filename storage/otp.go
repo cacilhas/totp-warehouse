@@ -84,7 +84,29 @@ func RetrieveOTP(key string) (totp.OTP, error) {
 	return totp.Import(repr)
 }
 
-// TODO: delete key/OTP
+func DeleteOTP(key string) error {
+	var db *bolt.DB
+	var err error
+	db, err = bolt.Open(dbfile, 0600, dboptions)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return db.Update(func(tx *bolt.Tx) error {
+		if bucket, err := tx.CreateBucketIfNotExists(bucketname); err == nil {
+			res := bucket.Get([]byte(key))
+			if res == nil {
+				return fmt.Errorf("key %v not found", key)
+			}
+
+			return bucket.Delete([]byte(key))
+
+		} else {
+			return err
+		}
+	})
+}
 
 func ListOTPKeys() ([]string, error) {
 	var db *bolt.DB
