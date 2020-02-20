@@ -21,8 +21,12 @@ type OTP interface {
 	Secret() string
 	// Token returns the current TOTP token
 	Token() string
+	// Key returns the storage key
+	Key() []byte
 	// String the URI used to supply the OTP data
 	String() string
+	// Bytes returns a binary representation of the string
+	Bytes() []byte
 }
 
 type pogo struct {
@@ -91,10 +95,6 @@ func (pogo pogo) Secret() string {
 	return pogo.secret
 }
 
-func (pogo pogo) String() string {
-	return pogo.uri.String()
-}
-
 func (pogo pogo) Token() string {
 	totp := otp.TOTP{
 		Secret:         pogo.secret,
@@ -102,6 +102,22 @@ func (pogo pogo) Token() string {
 		IsBase32Secret: true,
 	}
 	return totp.Now().Get()
+}
+
+func (pogo pogo) Key() []byte {
+	return []byte(fmt.Sprintf(
+		"%v@%v",
+		pogo.user,
+		strings.ReplaceAll(pogo.issuer, " ", "+"),
+	))
+}
+
+func (pogo pogo) String() string {
+	return pogo.uri.String()
+}
+
+func (pogo pogo) Bytes() []byte {
+	return []byte(pogo.String())
 }
 
 func getUser(path string) (string, string) {

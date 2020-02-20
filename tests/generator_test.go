@@ -29,8 +29,14 @@ func TestGenerator(t *testing.T) {
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
 			}
+			if key := got.Key(); string(key) != "batalema@cacilhas@Kode+Code" {
+				t.Fatalf("expected batalema@cacilhas@Kode+Code, got %v", key)
+			}
 			if value := fmt.Sprintf("%v", got); value != uri {
 				t.Fatalf("expected %v, got %v", uri, value)
+			}
+			if value := got.Bytes(); string(value) != fmt.Sprintf("%v", got) {
+				t.Fatalf("expected %v, got %v", got, value)
 			}
 		})
 
@@ -48,11 +54,17 @@ func TestGenerator(t *testing.T) {
 			if length := got.Length(); length != 8 {
 				t.Fatalf("expected 8, got %v", length)
 			}
+			if key := got.Key(); string(key) != "batalema@cacilhas@My+Issuer" {
+				t.Fatalf("expected batalema@cacilhas@My+Issuer, got %v", key)
+			}
 			if secret := got.Secret(); secret != "ABCDABCD" {
 				t.Fatalf("expected ABCDABCD, got %v", secret)
 			}
 			if value := fmt.Sprintf("%v", got); value != uri {
 				t.Fatalf("expected %v, got %v", uri, value)
+			}
+			if value := got.Bytes(); string(value) != fmt.Sprintf("%v", got) {
+				t.Fatalf("expected %v, got %v", got, value)
 			}
 		})
 	})
