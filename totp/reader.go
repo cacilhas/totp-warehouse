@@ -19,19 +19,23 @@ func ReadTotpFromScreen() (string, error) {
 
 	var file *os.File
 
-	file, err = ioutil.TempFile(os.TempDir(), "*.png")
-	if err != nil {
+	if file, err = ioutil.TempFile(os.TempDir(), "*.png"); err != nil {
 		return "could not open file", err
 	}
+	filename := file.Name()
 	defer func() {
 		file.Close()
-		os.Remove(file.Name())
+		os.Remove(filename)
 	}()
 
 	if err = png.Encode(file, image); err != nil {
 		return "could not encode PNG", err
 	}
 
+	file.Close()
+	if file, err = os.Open(filename); err != nil {
+		return "error trying to reopen temp file", err
+	}
 	return ReadTotp(file)
 }
 
