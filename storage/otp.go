@@ -1,89 +1,63 @@
 package storage
 
 import (
-	"path"
-
+	"github.com/99designs/keyring"
 	"github.com/cacilhas/totp-warehouse/config"
 	"github.com/cacilhas/totp-warehouse/totp"
-	"github.com/cfdrake/go-gdbm"
 )
 
 var (
-	dbfile string = path.Join(config.ConfigDir(), "storage.db")
+	ring keyring.Keyring
 )
 
 func init() {
-	db, err := gdbm.Open(dbfile, "r")
-	if err == nil {
-		db.Close()
-	} else {
-		db, err := gdbm.Open(dbfile, "c")
-		if err != nil {
-			panic(err)
-		}
-		defer db.Close()
-		db.Sync()
+	var err error
+	appname := config.AppName()
+	kconfig := keyring.Config{
+		ServiceName:              appname,
+		KeychainName:             "info.cacilhas." + appname,
+		KeychainTrustApplication: config.Testing(),
+		KeychainSynchronizable:   false,
+		FileDir:                  config.ConfigDir(),
+		AllowedBackends: []keyring.BackendType{
+			keyring.KWalletBackend,
+			keyring.KeychainBackend,
+			keyring.SecretServiceBackend,
+			keyring.WinCredBackend,
+			keyring.PassBackend,
+			keyring.FileBackend,
+		},
 	}
-}
+	if config.Testing() {
+		kconfig.FilePasswordFunc = func(_p string) (string, error) {
+			return "", nil
+		}
+	}
 
-func StorageFilename() string {
-	return dbfile
+	if ring, err = keyring.Open(kconfig); err != nil {
+		panic(err)
+	}
 }
 
 func SaveOTP(otp totp.OTP) error {
-	db, err := gdbm.Open(dbfile, "w")
-	if err != nil {
-		return err
-	}
-	defer func() {
-		defer db.Close()
-		db.Sync()
-	}()
-	key := otp.Key()
-	if db.Exists(key) {
-		return db.Replace(key, otp.String())
-	}
-	return db.Insert(key, otp.String())
+	return ring.Set(keyring.Item{
+		Key:  otp.Key(),
+		Data: []byte(otp.String()),
+	})
 }
 
 func RetrieveOTP(key string) (totp.OTP, error) {
-	db, err := gdbm.Open(dbfile, "r")
+	item, err := ring.Get(key)
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
-	value, err := db.Fetch(key)
-	if err != nil {
-		return nil, err
-	}
-	return totp.Import(value)
+	return totp.Import(string(item.Data))
 }
 
 func DeleteOTP(key string) error {
-	db, err := gdbm.Open(dbfile, "w")
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	return db.Delete(key)
+	return ring.Remove(key)
 }
 
 func ListOTPKeys() ([]string, error) {
-	db, err := gdbm.Open(dbfile, "r")
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-	res := make([]string, 0)
-	if key, err := db.FirstKey(); err == nil {
-		res = append(res, key)
-		for {
-			key, err = db.NextKey(key)
-			if err != nil {
-				break
-			}
-			res = append(res, key)
-		}
-	}
-	return res, nil
+	return ring.Keys()
 }
