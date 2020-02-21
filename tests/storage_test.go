@@ -2,6 +2,7 @@ package tests
 
 import (
 	"regexp"
+	"sort"
 	"testing"
 
 	"github.com/cacilhas/totp-warehouse/storage"
@@ -10,7 +11,7 @@ import (
 
 func TestStorage(t *testing.T) {
 	t.Run("storage filename", func(t *testing.T) {
-		expected := regexp.MustCompilePOSIX("^/tmp/[0-9]+/data\\.db$")
+		expected := regexp.MustCompilePOSIX("^/tmp/[0-9]+/storage\\.db$")
 		if got := storage.StorageFilename(); !expected.Match([]byte(got)) {
 			t.Fatalf("unexpected database file %v", got)
 		}
@@ -33,6 +34,7 @@ func TestStorage(t *testing.T) {
 		if got, err := storage.ListOTPKeys(); len(got) != 2 || err != nil {
 			t.Fatalf("unexpected list or error: %v / %v", got, err)
 		} else {
+			sort.Strings(got)
 			if got[0] != "batalema@cacilhas@Kode+Code" {
 				t.Fatalf("expected batalema@cacilhas@Kode+Code, got %v", got[0])
 			}

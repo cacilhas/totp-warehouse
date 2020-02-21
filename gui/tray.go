@@ -34,11 +34,13 @@ func onReady() {
 	systray.SetTitle("TOTP Warehouse")
 	systray.SetTooltip("TOTP Warehouse")
 
-	if keys, err := storage.ListOTPKeys(); err != nil {
+	if keys, err := storage.ListOTPKeys(); err == nil {
 		for _, key := range keys {
 			go dealWith(systray.AddMenuItem(key, "").ClickedCh, key)
 		}
 		systray.AddSeparator()
+	} else {
+		notifyError(err)
 	}
 
 	addKeyItem := systray.AddMenuItem("Add new Key", "")
@@ -83,7 +85,7 @@ func dealWith(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
-			if otp, err := totp.Import(key); err == nil {
+			if otp, err := storage.RetrieveOTP(key); err == nil {
 				token := otp.Token()
 				if err := clipboard.WriteAll(token); err == nil {
 					notify.Notify(

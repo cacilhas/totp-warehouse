@@ -22,11 +22,9 @@ type OTP interface {
 	// Token returns the current TOTP token
 	Token() string
 	// Key returns the storage key
-	Key() []byte
+	Key() string
 	// String the URI used to supply the OTP data
 	String() string
-	// Bytes returns a binary representation of the string
-	Bytes() []byte
 }
 
 type pogo struct {
@@ -104,12 +102,12 @@ func (pogo pogo) Token() string {
 	return totp.Now().Get()
 }
 
-func (pogo pogo) Key() []byte {
-	return []byte(fmt.Sprintf(
+func (pogo pogo) Key() string {
+	return fmt.Sprintf(
 		"%v@%v",
 		pogo.user,
 		strings.ReplaceAll(pogo.issuer, " ", "+"),
-	))
+	)
 }
 
 func (pogo pogo) String() string {
