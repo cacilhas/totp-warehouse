@@ -2,36 +2,22 @@ package storage
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/cacilhas/totp-warehouse/config"
 	"github.com/cacilhas/totp-warehouse/totp"
-	"github.com/kirsle/configdir"
 )
 
 var (
-	basedir    string        // set in init()
-	dbfile     string        // set in init()
+	dbfile     string        = path.Join(config.ConfigDir(), "data.db")
 	dboptions  *bolt.Options = new(bolt.Options)
 	bucketname []byte        = []byte("main")
 )
 
 func init() {
-	if strings.HasSuffix(os.Args[0], ".test") {
-		var err error
-		if basedir, err = ioutil.TempDir("/tmp", ""); err != nil {
-			panic(err)
-		}
-	} else {
-		basedir = configdir.LocalConfig("totp-warehouse")
-	}
-	dbfile = path.Join(basedir, "data.db")
-	configdir.MakePath(basedir)
-	timeout, _ := time.ParseDuration("500ms")
+	timeout, _ := time.ParseDuration("5s")
 	dboptions.Timeout = timeout
 }
 
