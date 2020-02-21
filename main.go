@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
-	"syscall"
+	"time"
 
 	"github.com/cacilhas/totp-warehouse/gui"
 )
@@ -14,10 +14,9 @@ func main() {
 
 	} else {
 		// Fork
-		binary, _ := exec.LookPath(os.Args[0])
-		if err := syscall.Exec(binary, append(os.Args, "-nofork"), os.Environ()); err != nil {
-			panic(err)
-		}
+		args := append(os.Args[1:], "-nofork")
+		exec.Command(os.Args[0], args...).Start()
+		time.Sleep(2 * time.Second)
 		os.Exit(0)
 	}
 }

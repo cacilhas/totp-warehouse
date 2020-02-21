@@ -7,7 +7,7 @@ import (
 	"image/png"
 	"os"
 	"os/exec"
-	"syscall"
+	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/cacilhas/totp-warehouse/assets"
@@ -105,8 +105,8 @@ func dealWith(channel <-chan struct{}, key string) {
 
 func restart() {
 	systray.Quit()
-	binary, _ := exec.LookPath(os.Args[0])
-	syscall.Exec(binary, os.Args, os.Environ())
+	exec.Command(os.Args[0], os.Args[1:]...).Start()
+	time.Sleep(2 * time.Second)
 	os.Exit(0)
 }
 
