@@ -81,7 +81,7 @@ func notifyError(err error) {
 	notify.Alert("TOTP Warehouse", "error", err.Error(), "")
 }
 
-func dealWith(channel <-chan struct{}, key string) {
+func dealWith(channel <-chan interface{}, key string) {
 	for {
 		select {
 		case <-channel:
