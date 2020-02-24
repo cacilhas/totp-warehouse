@@ -51,17 +51,9 @@ func onReady() {
 	systray.SetIcon(buf.Bytes())
 	systray.SetTitle("TOTP Warehouse")
 	systray.SetTooltip("TOTP Warehouse")
-
-	if keys, err := storage.ListOTPKeys(); err == nil {
-		for _, key := range keys {
-			go dealWith(systray.AddMenuItem(key, "").ClickedCh, key)
-		}
-		systray.AddSeparator()
-	} else {
-		notifyError(err)
-	}
-
 	addKeyItem := systray.AddMenuItem("Add new Key", "")
+	systray.AddSeparator()
+	fillMenu()
 	quitItem := systray.AddMenuItem("Quit TOTP Warehouse", "")
 
 	for {
@@ -95,11 +87,33 @@ func onReady() {
 	}
 }
 
+func fillMenu() {
+	if keys, err := storage.ListOTPKeys(); err == nil {
+		for _, key := range keys {
+			label := fmt.Sprintf("Copy %v", key)
+			go dealWithGetToken(systray.AddMenuItem(label, "").ClickedCh, key)
+		}
+		systray.AddSeparator()
+	} else {
+		notifyError(err)
+	}
+
+	if keys, err := storage.ListOTPKeys(); err == nil {
+		for _, key := range keys {
+			label := fmt.Sprintf("Remove %v", key)
+			go dealWithRemove(systray.AddMenuItem(label, "").ClickedCh, key)
+		}
+		systray.AddSeparator()
+	} else {
+		notifyError(err)
+	}
+}
+
 func notifyError(err error) {
 	notify.Alert("TOTP Warehouse", "error", err.Error(), "")
 }
 
-func dealWith(channel <-chan struct{}, key string) {
+func dealWithGetToken(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
@@ -113,6 +127,26 @@ func dealWith(channel <-chan struct{}, key string) {
 						"",
 					)
 				}
+
+			} else {
+				notifyError(err)
+			}
+		}
+	}
+}
+
+func dealWithRemove(channel <-chan struct{}, key string) {
+	for {
+		select {
+		case <-channel:
+			if err := storage.DeleteOTP(key); err == nil {
+				notify.Notify(
+					"TOTP Warehouse",
+					"notice",
+					fmt.Sprintf("%v removed", key),
+					"",
+				)
+				restart()
 
 			} else {
 				notifyError(err)
