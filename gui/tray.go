@@ -153,19 +153,32 @@ func dealWithRemove(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
-			if err := storage.DeleteOTP(key); err == nil {
-				notify.Notify(
-					"TOTP Warehouse",
-					"Notice",
-					fmt.Sprintf("%v removed", key),
-					infoDialog,
-				)
-				restart()
-
-			} else {
-				notifyError(err)
+			// TODO: find a dialog lib
+			cmd := exec.Command(
+				"zenity",
+				"--question",
+				fmt.Sprintf("--text='Are you sure you want to remove %v?'", key),
+			)
+			cmd.Start()
+			if cmd.Wait() == nil {
+				remove(key)
 			}
 		}
+	}
+}
+
+func remove(key string) {
+	if err := storage.DeleteOTP(key); err == nil {
+		notify.Notify(
+			"TOTP Warehouse",
+			"Notice",
+			fmt.Sprintf("%v removed", key),
+			infoDialog,
+		)
+		restart()
+
+	} else {
+		notifyError(err)
 	}
 }
 
