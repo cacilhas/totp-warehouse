@@ -24,11 +24,11 @@ func init() {
 	var iconPath string
 	var file *os.File
 	var err error
-	rootDir := os.Getenv("APPDIR")
-	if rootDir == "" {
+	appDir := os.Getenv("APPDIR")
+	if appDir == "" {
 		iconPath = "./assets/key.png"
 	} else {
-		iconPath = rootDir + "/key.png"
+		iconPath = appDir + "/key.png"
 	}
 	if file, err = os.Open(iconPath); err != nil {
 		panic(err)
