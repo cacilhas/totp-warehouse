@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/cacilhas/totp-warehouse/assets"
 	"github.com/cacilhas/totp-warehouse/storage"
 	"github.com/cacilhas/totp-warehouse/totp"
 	"github.com/getlantern/systray"
@@ -18,8 +17,27 @@ import (
 )
 
 var (
-	icon *image.RGBA = assets.Key()
+	icon image.Image
 )
+
+func init() {
+	var iconPath string
+	var file *os.File
+	var err error
+	rootDir := os.Getenv("APPDIR")
+	if rootDir == "" {
+		iconPath = "./assets/key.png"
+	} else {
+		iconPath = rootDir + "/key.png"
+	}
+	if file, err = os.Open(iconPath); err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	if icon, err = png.Decode(file); err != nil {
+		panic(err)
+	}
+}
 
 func Start() {
 	systray.Run(onReady, onExit)
@@ -81,7 +99,7 @@ func notifyError(err error) {
 	notify.Alert("TOTP Warehouse", "error", err.Error(), "")
 }
 
-func dealWith(channel <-chan interface{}, key string) {
+func dealWith(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
