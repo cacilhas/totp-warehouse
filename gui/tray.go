@@ -98,31 +98,23 @@ func onReady() {
 
 func fillMenu() {
 	if keys, err := storage.ListOTPKeys(); err == nil {
-		for _, key := range keys {
-			label := fmt.Sprintf("Show %v", key)
-			go dealWithShow(systray.AddMenuItem(label, "").ClickedCh, key)
+		if len(keys) > 0 {
+			for _, key := range keys {
+				label := fmt.Sprintf("Show %v", key)
+				go dealWithShow(systray.AddMenuItem(label, "").ClickedCh, key)
+			}
+			systray.AddSeparator()
+			for _, key := range keys {
+				label := fmt.Sprintf("Copy %v", key)
+				go dealWithGetToken(systray.AddMenuItem(label, "").ClickedCh, key)
+			}
+			systray.AddSeparator()
+			for _, key := range keys {
+				label := fmt.Sprintf("Remove %v", key)
+				go dealWithRemove(systray.AddMenuItem(label, "").ClickedCh, key)
+			}
+			systray.AddSeparator()
 		}
-		systray.AddSeparator()
-	} else {
-		notifyError(err)
-	}
-
-	if keys, err := storage.ListOTPKeys(); err == nil {
-		for _, key := range keys {
-			label := fmt.Sprintf("Copy %v", key)
-			go dealWithGetToken(systray.AddMenuItem(label, "").ClickedCh, key)
-		}
-		systray.AddSeparator()
-	} else {
-		notifyError(err)
-	}
-
-	if keys, err := storage.ListOTPKeys(); err == nil {
-		for _, key := range keys {
-			label := fmt.Sprintf("Remove %v", key)
-			go dealWithRemove(systray.AddMenuItem(label, "").ClickedCh, key)
-		}
-		systray.AddSeparator()
 	} else {
 		notifyError(err)
 	}
