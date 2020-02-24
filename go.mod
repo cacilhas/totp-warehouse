@@ -11,5 +11,6 @@ require (
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/liyue201/goqr v0.0.0-20200116030114-65015cdd3a41
 	github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
+	github.com/skip2/go-qrcode v0.0.0-20191027152451-9434209cb086
 	github.com/vova616/screenshot v0.0.0-20191005130345-da36db2560ab
 )
