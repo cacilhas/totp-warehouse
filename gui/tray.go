@@ -34,10 +34,10 @@ func init() {
 		infoDialog = "./assets/info.png"
 		warnDialog = "./assets/warn.png"
 	} else {
-		iconPath = appDir + "/key.png"
-		errorDialog = appDir + "/error.png"
-		infoDialog = appDir + "/info.png"
-		warnDialog = appDir + "/warn.png"
+		iconPath = appDir + "/usr/share/icons/128x128/apps/key.png"
+		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
+		infoDialog = appDir + "/usr/share/icons/48x48/status/info.png"
+		warnDialog = appDir + "/usr/share/icons/48x48/status/warn.png"
 	}
 	if file, err = os.Open(iconPath); err != nil {
 		panic(err)

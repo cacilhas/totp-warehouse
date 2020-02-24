@@ -19,7 +19,7 @@ func init() {
 	if appDir == "" {
 		errorDialog = "./assets/error.png"
 	} else {
-		errorDialog = appDir + "/error.png"
+		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
 	}
 }
 
