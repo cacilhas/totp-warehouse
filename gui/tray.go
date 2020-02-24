@@ -60,10 +60,10 @@ func onReady() {
 	systray.SetIcon(buf.Bytes())
 	systray.SetTitle("TOTP Warehouse")
 	systray.SetTooltip("TOTP Warehouse")
-	addKeyItem := systray.AddMenuItem("Add new Key", "")
+	addKeyItem := systray.AddMenuItem("⊕ Add new Key", "")
 	systray.AddSeparator()
 	fillMenu()
-	quitItem := systray.AddMenuItem("Quit TOTP Warehouse", "")
+	quitItem := systray.AddMenuItem("⏻ Quit TOTP Warehouse", "")
 
 	for {
 		select {
@@ -98,21 +98,10 @@ func onReady() {
 
 func fillMenu() {
 	if keys, err := storage.ListOTPKeys(); err == nil {
-		if len(keys) > 0 {
-			for _, key := range keys {
-				label := fmt.Sprintf("Show %v", key)
-				go dealWithShow(systray.AddMenuItem(label, "").ClickedCh, key)
-			}
-			systray.AddSeparator()
-			for _, key := range keys {
-				label := fmt.Sprintf("Copy %v", key)
-				go dealWithGetToken(systray.AddMenuItem(label, "").ClickedCh, key)
-			}
-			systray.AddSeparator()
-			for _, key := range keys {
-				label := fmt.Sprintf("Remove %v", key)
-				go dealWithRemove(systray.AddMenuItem(label, "").ClickedCh, key)
-			}
+		for _, key := range keys {
+			go dealWithShow(systray.AddMenuItem(fmt.Sprintf("👁 %v", key), "").ClickedCh, key)
+			go dealWithGetToken(systray.AddMenuItem(fmt.Sprintf("⧉ %v", key), "").ClickedCh, key)
+			go dealWithRemove(systray.AddMenuItem(fmt.Sprintf("❌ %v", key), "").ClickedCh, key)
 			systray.AddSeparator()
 		}
 	} else {
