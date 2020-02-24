@@ -153,19 +153,23 @@ func dealWithRemove(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
-			if err := storage.DeleteOTP(key); err == nil {
-				notify.Notify(
-					"TOTP Warehouse",
-					"Notice",
-					fmt.Sprintf("%v removed", key),
-					infoDialog,
-				)
-				restart()
-
-			} else {
-				notifyError(err)
-			}
+			remove(key)
 		}
+	}
+}
+
+func remove(key string) {
+	if err := storage.DeleteOTP(key); err == nil {
+		notify.Notify(
+			"TOTP Warehouse",
+			"Notice",
+			fmt.Sprintf("%v removed", key),
+			infoDialog,
+		)
+		restart()
+
+	} else {
+		notifyError(err)
 	}
 }
 
