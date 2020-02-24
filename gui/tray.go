@@ -17,7 +17,10 @@ import (
 )
 
 var (
-	icon image.Image
+	icon        image.Image
+	errorDialog string
+	infoDialog  string
+	warnDialog  string
 )
 
 func init() {
@@ -27,8 +30,14 @@ func init() {
 	appDir := os.Getenv("APPDIR")
 	if appDir == "" {
 		iconPath = "./assets/key.png"
+		errorDialog = "./assets/error.png"
+		infoDialog = "./assets/info.png"
+		warnDialog = "./assets/warn.png"
 	} else {
 		iconPath = appDir + "/key.png"
+		errorDialog = appDir + "/error.png"
+		infoDialog = appDir + "/info.png"
+		warnDialog = appDir + "/warn.png"
 	}
 	if file, err = os.Open(iconPath); err != nil {
 		panic(err)
@@ -51,17 +60,9 @@ func onReady() {
 	systray.SetIcon(buf.Bytes())
 	systray.SetTitle("TOTP Warehouse")
 	systray.SetTooltip("TOTP Warehouse")
-
-	if keys, err := storage.ListOTPKeys(); err == nil {
-		for _, key := range keys {
-			go dealWith(systray.AddMenuItem(key, "").ClickedCh, key)
-		}
-		systray.AddSeparator()
-	} else {
-		notifyError(err)
-	}
-
 	addKeyItem := systray.AddMenuItem("Add new Key", "")
+	systray.AddSeparator()
+	fillMenu()
 	quitItem := systray.AddMenuItem("Quit TOTP Warehouse", "")
 
 	for {
@@ -72,9 +73,9 @@ func onReady() {
 					if err := storage.SaveOTP(otp); err == nil {
 						notify.Notify(
 							"TOTP Warehouse",
-							"notice",
+							"Notice",
 							fmt.Sprintf("%v added", otp),
-							"",
+							infoDialog,
 						)
 						restart()
 
@@ -95,11 +96,43 @@ func onReady() {
 	}
 }
 
-func notifyError(err error) {
-	notify.Alert("TOTP Warehouse", "error", err.Error(), "")
+func fillMenu() {
+	if keys, err := storage.ListOTPKeys(); err == nil {
+		for _, key := range keys {
+			label := fmt.Sprintf("Show %v", key)
+			go dealWithShow(systray.AddMenuItem(label, "").ClickedCh, key)
+		}
+		systray.AddSeparator()
+	} else {
+		notifyError(err)
+	}
+
+	if keys, err := storage.ListOTPKeys(); err == nil {
+		for _, key := range keys {
+			label := fmt.Sprintf("Copy %v", key)
+			go dealWithGetToken(systray.AddMenuItem(label, "").ClickedCh, key)
+		}
+		systray.AddSeparator()
+	} else {
+		notifyError(err)
+	}
+
+	if keys, err := storage.ListOTPKeys(); err == nil {
+		for _, key := range keys {
+			label := fmt.Sprintf("Remove %v", key)
+			go dealWithRemove(systray.AddMenuItem(label, "").ClickedCh, key)
+		}
+		systray.AddSeparator()
+	} else {
+		notifyError(err)
+	}
 }
 
-func dealWith(channel <-chan struct{}, key string) {
+func notifyError(err error) {
+	notify.Alert("TOTP Warehouse", "Error", err.Error(), errorDialog)
+}
+
+func dealWithGetToken(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
@@ -108,11 +141,45 @@ func dealWith(channel <-chan struct{}, key string) {
 				if err := clipboard.WriteAll(token); err == nil {
 					notify.Notify(
 						"TOTP Warehouse",
-						"notice",
+						"Notice",
 						fmt.Sprintf("%v copied to clipboard", token),
-						"",
+						infoDialog,
 					)
 				}
+
+			} else {
+				notifyError(err)
+			}
+		}
+	}
+}
+
+func dealWithShow(channel <-chan struct{}, key string) {
+	for {
+		select {
+		case <-channel:
+			if otp, err := storage.RetrieveOTP(key); err == nil {
+				totp.ShowOTP(otp)
+
+			} else {
+				notifyError(err)
+			}
+		}
+	}
+}
+
+func dealWithRemove(channel <-chan struct{}, key string) {
+	for {
+		select {
+		case <-channel:
+			if err := storage.DeleteOTP(key); err == nil {
+				notify.Notify(
+					"TOTP Warehouse",
+					"Notice",
+					fmt.Sprintf("%v removed", key),
+					infoDialog,
+				)
+				restart()
 
 			} else {
 				notifyError(err)
@@ -129,5 +196,10 @@ func restart() {
 }
 
 func onExit() {
-	//
+	notify.Notify(
+		"TOTP Warehouse",
+		"Warn",
+		"Exiting",
+		warnDialog,
+	)
 }
