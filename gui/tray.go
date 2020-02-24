@@ -177,10 +177,10 @@ func restart() {
 }
 
 func onExit() {
-	notify.Notify(
-		"TOTP Warehouse",
-		"Warn",
-		"Exiting",
-		warnDialog,
-	)
+	//notify.Notify(
+	//	"TOTP Warehouse",
+	//	"Warn",
+	//	"Exiting",
+	//	warnDialog,
+	//)
 }
