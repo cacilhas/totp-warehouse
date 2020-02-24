@@ -153,7 +153,16 @@ func dealWithRemove(channel <-chan struct{}, key string) {
 	for {
 		select {
 		case <-channel:
-			remove(key)
+			// TODO: find a dialog lib
+			cmd := exec.Command(
+				"zenity",
+				"--question",
+				fmt.Sprintf("--text='Are you sure you want to remove %v?'", key),
+			)
+			cmd.Start()
+			if cmd.Wait() == nil {
+				remove(key)
+			}
 		}
 	}
 }
