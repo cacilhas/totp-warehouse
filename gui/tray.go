@@ -14,7 +14,6 @@ import (
 	"github.com/cacilhas/totp-warehouse/storage"
 	"github.com/cacilhas/totp-warehouse/totp"
 	"github.com/getlantern/systray"
-	"github.com/martinlindhe/notify"
 )
 
 var (
@@ -57,24 +56,19 @@ func onReady() {
 			if code, err := totp.ReadTotpFromScreen(); err == nil {
 				if otp, err := totp.Import(code); err == nil {
 					if err := storage.SaveOTP(otp); err == nil {
-						notify.Notify(
-							"TOTP Warehouse",
-							"Notice",
-							fmt.Sprintf("%v added", otp),
-							config.GetIconPath(config.INFO),
-						)
+						helpers.NotifyInfo(fmt.Sprintf("%v added", otp))
 						restart()
 
 					} else {
-						notifyError(err)
+						helpers.NotifyError(err)
 					}
 
 				} else {
-					notifyError(err)
+					helpers.NotifyError(err)
 				}
 
 			} else {
-				notifyError(err)
+				helpers.NotifyError(err)
 			}
 		case <-quitItem.ClickedCh:
 			systray.Quit()
@@ -91,12 +85,8 @@ func fillMenu() {
 			systray.AddSeparator()
 		}
 	} else {
-		notifyError(err)
+		helpers.NotifyError(err)
 	}
-}
-
-func notifyError(err error) {
-	notify.Alert("TOTP Warehouse", "Error", err.Error(), config.GetIconPath(config.ERROR))
 }
 
 func dealWithGetToken(channel <-chan struct{}, key string) {
@@ -106,16 +96,11 @@ func dealWithGetToken(channel <-chan struct{}, key string) {
 			if otp, err := storage.RetrieveOTP(key); err == nil {
 				token := otp.Token()
 				if err := clipboard.WriteAll(token); err == nil {
-					notify.Notify(
-						"TOTP Warehouse",
-						"Notice",
-						fmt.Sprintf("%v copied to clipboard", token),
-						config.GetIconPath(config.INFO),
-					)
+					helpers.NotifyInfo(fmt.Sprintf("%v copied to clipboard", token))
 				}
 
 			} else {
-				notifyError(err)
+				helpers.NotifyError(err)
 			}
 		}
 	}
@@ -129,7 +114,7 @@ func dealWithShow(channel <-chan struct{}, key string) {
 				totp.ShowOTP(otp)
 
 			} else {
-				notifyError(err)
+				helpers.NotifyError(err)
 			}
 		}
 	}
@@ -155,16 +140,11 @@ func dealWithRemove(channel <-chan struct{}, key string) {
 
 func remove(key string) {
 	if err := storage.DeleteOTP(key); err == nil {
-		notify.Notify(
-			"TOTP Warehouse",
-			"Notice",
-			fmt.Sprintf("%v removed", key),
-			config.GetIconPath(config.INFO),
-		)
+		helpers.NotifyInfo(fmt.Sprintf("%v removed", key))
 		restart()
 
 	} else {
-		notifyError(err)
+		helpers.NotifyError(err)
 	}
 }
 
@@ -174,10 +154,5 @@ func restart() {
 }
 
 func onExit() {
-	//notify.Notify(
-	//	"TOTP Warehouse",
-	//	"Warn",
-	//	"Exiting",
-	//	warnDialog,
-	//)
+	//helpers.NotifyWarn("Exiting")
 }
