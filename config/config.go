@@ -46,8 +46,7 @@ func init() {
 	}
 	configdir.MakePath(basedir)
 
-	appDir := os.Getenv("APPDIR")
-	if appDir == "" {
+	if appDir := os.Getenv("APPDIR"); appDir == "" {
 		appIcon = "./assets/key.png"
 		errorDialog = "./assets/error.png"
 		infoDialog = "./assets/info.png"
