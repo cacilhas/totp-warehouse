@@ -3,8 +3,6 @@ package totp
 import (
 	"io/ioutil"
 	"os"
-	"os/exec"
-	"runtime"
 
 	"github.com/cacilhas/totp-warehouse/helpers"
 	qrcode "github.com/skip2/go-qrcode"
@@ -29,17 +27,9 @@ func ShowOTP(otp OTP) {
 		return
 	}
 
-	var cmd *exec.Cmd
-	if runtime.GOOS == "linux" {
-		cmd = exec.Command("xdg-open", filename)
+	if cmd, err := helpers.Open(filename); err == nil {
+		cmd.Wait()
 	} else {
-		cmd = exec.Command("open", filename)
-	}
-
-	if err = cmd.Start(); err != nil {
 		helpers.NotifyError(err)
-		return
 	}
-
-	cmd.Wait()
 }
