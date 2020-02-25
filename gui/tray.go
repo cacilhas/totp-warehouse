@@ -7,9 +7,9 @@ import (
 	"image/png"
 	"os"
 	"os/exec"
-	"time"
 
 	"github.com/atotto/clipboard"
+	"github.com/cacilhas/totp-warehouse/helpers"
 	"github.com/cacilhas/totp-warehouse/storage"
 	"github.com/cacilhas/totp-warehouse/totp"
 	"github.com/getlantern/systray"
@@ -184,9 +184,7 @@ func remove(key string) {
 
 func restart() {
 	systray.Quit()
-	exec.Command(os.Args[0], os.Args[1:]...).Start()
-	time.Sleep(2 * time.Second)
-	os.Exit(0)
+	helpers.Fork(nil)
 }
 
 func onExit() {
