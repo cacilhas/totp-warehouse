@@ -10,7 +10,7 @@ var (
 )
 
 func NotifyError(err error) {
-	notify.Alert("TOTP Warehouse", "Error", err.Error(), config.GetIconPath(config.ERROR))
+	notify.Alert(title, "Error", err.Error(), config.GetIconPath(config.ERROR))
 }
 
 func NotifyInfo(message string) {
