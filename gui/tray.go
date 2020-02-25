@@ -100,7 +100,7 @@ func fillMenu() {
 	if keys, err := storage.ListOTPKeys(); err == nil {
 		for _, key := range keys {
 			go dealWithShow(systray.AddMenuItem(fmt.Sprintf("👁 %v", key), "").ClickedCh, key)
-			go dealWithGetToken(systray.AddMenuItem(fmt.Sprintf("⧉ %v", key), "").ClickedCh, key)
+			go dealWithGetToken(systray.AddMenuItem(fmt.Sprintf("📄 %v", key), "").ClickedCh, key)
 			go dealWithRemove(systray.AddMenuItem(fmt.Sprintf("❌ %v", key), "").ClickedCh, key)
 			systray.AddSeparator()
 		}
