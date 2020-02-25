@@ -6,17 +6,18 @@ import (
 )
 
 var (
-	title = "TOTP Warehouse"
+	title         = "TOTP Warehouse"
+	currentConfig = config.GetConfig()
 )
 
 func NotifyError(err error) {
-	notify.Alert(title, "Error", err.Error(), config.GetIconPath(config.ERROR))
+	notify.Alert(title, "Error", err.Error(), currentConfig.GetIconPath(config.ERROR))
 }
 
 func NotifyInfo(message string) {
-	notify.Notify(title, "Notice", message, config.GetIconPath(config.INFO))
+	notify.Notify(title, "Notice", message, currentConfig.GetIconPath(config.INFO))
 }
 
 func NotifyWarn(message string) {
-	notify.Notify(title, "Warning", message, config.GetIconPath(config.WARN))
+	notify.Notify(title, "Warning", message, currentConfig.GetIconPath(config.WARN))
 }

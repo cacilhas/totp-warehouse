@@ -12,6 +12,7 @@ var (
 
 func init() {
 	var err error
+	config := config.GetConfig()
 	appname := config.AppName()
 	kconfig := keyring.Config{
 		ServiceName:              appname,

@@ -18,7 +18,7 @@ func main() {
 }
 
 func start() {
-	configdir := config.ConfigDir()
+	configdir := config.GetConfig().ConfigDir()
 	lockname := path.Join(configdir, "lock")
 	if lockfile, err := os.OpenFile(lockname, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600); err == nil {
 		lockfile.Close()

@@ -23,7 +23,7 @@ var (
 func init() {
 	var file *os.File
 	var err error
-	iconPath := config.GetIconPath(config.ICON)
+	iconPath := config.GetConfig().GetIconPath(config.ICON)
 	if file, err = os.Open(iconPath); err != nil {
 		panic(err)
 	}

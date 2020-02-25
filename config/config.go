@@ -8,17 +8,23 @@ import (
 	"github.com/kirsle/configdir"
 )
 
-var (
-	appname     string = "totp-warehouse"
-	basedir     string
-	istest      bool
-	appIcon     string
-	errorDialog string
-	infoDialog  string
-	warnDialog  string
-)
-
 type Icon int
+
+type Config interface {
+	AppName() string
+	ConfigDir() string
+	Testing() bool
+	GetIconPath(Icon) string
+}
+
+type configT struct {
+	appname, basedir, appIcon, errorDialog, infoDialog, warnDialog string
+	istest                                                         bool
+}
+
+var (
+	config = configT{appname: "totp-warehouse"}
+)
 
 const (
 	// ICON is the application icon path index
@@ -34,52 +40,57 @@ const (
 func init() {
 	if strings.HasSuffix(os.Args[0], ".test") {
 		var err error
-		appname = appname + ".test"
-		istest = true
-		if basedir, err = ioutil.TempDir("/tmp", ""); err != nil {
+		config.appname = config.appname + ".test"
+		config.istest = true
+		if config.basedir, err = ioutil.TempDir("/tmp", ""); err != nil {
 			panic(err)
 		}
 
 	} else {
-		istest = false
-		basedir = configdir.LocalConfig(appname)
+		config.istest = false
+		config.basedir = configdir.LocalConfig(config.appname)
 	}
-	configdir.MakePath(basedir)
+	configdir.MakePath(config.basedir)
 
 	if appDir := os.Getenv("APPDIR"); appDir == "" {
-		appIcon = "./assets/key.png"
-		errorDialog = "./assets/error.png"
-		infoDialog = "./assets/info.png"
-		warnDialog = "./assets/warn.png"
+		config.appIcon = "./assets/key.png"
+		config.errorDialog = "./assets/error.png"
+		config.infoDialog = "./assets/info.png"
+		config.warnDialog = "./assets/warn.png"
 	} else {
-		appIcon = appDir + "/usr/share/icons/128x128/apps/key.png"
-		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
-		infoDialog = appDir + "/usr/share/icons/48x48/status/info.png"
-		warnDialog = appDir + "/usr/share/icons/48x48/status/warn.png"
+		config.appIcon = appDir + "/usr/share/icons/128x128/apps/key.png"
+		config.errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
+		config.infoDialog = appDir + "/usr/share/icons/48x48/status/info.png"
+		config.warnDialog = appDir + "/usr/share/icons/48x48/status/warn.png"
 	}
 }
 
-func AppName() string {
-	return appname
+// GetConfig returns the current configuration instance
+func GetConfig() Config {
+	return config
 }
 
-func ConfigDir() string {
-	return basedir
+func (config configT) AppName() string {
+	return config.appname
 }
 
-func Testing() bool {
-	return istest
+func (config configT) ConfigDir() string {
+	return config.basedir
 }
 
-func GetIconPath(index Icon) string {
+func (config configT) Testing() bool {
+	return config.istest
+}
+
+func (config configT) GetIconPath(index Icon) string {
 	switch index {
 	case ERROR:
-		return errorDialog
+		return config.errorDialog
 	case INFO:
-		return infoDialog
+		return config.infoDialog
 	case WARN:
-		return warnDialog
+		return config.warnDialog
 	default:
-		return appIcon
+		return config.appIcon
 	}
 }
