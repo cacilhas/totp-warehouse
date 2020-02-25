@@ -7,38 +7,23 @@ import (
 	"image/png"
 	"os"
 	"os/exec"
-	"time"
 
 	"github.com/atotto/clipboard"
+	"github.com/cacilhas/totp-warehouse/config"
+	"github.com/cacilhas/totp-warehouse/helpers"
 	"github.com/cacilhas/totp-warehouse/storage"
 	"github.com/cacilhas/totp-warehouse/totp"
 	"github.com/getlantern/systray"
-	"github.com/martinlindhe/notify"
 )
 
 var (
-	icon        image.Image
-	errorDialog string
-	infoDialog  string
-	warnDialog  string
+	icon image.Image
 )
 
 func init() {
-	var iconPath string
 	var file *os.File
 	var err error
-	appDir := os.Getenv("APPDIR")
-	if appDir == "" {
-		iconPath = "./assets/key.png"
-		errorDialog = "./assets/error.png"
-		infoDialog = "./assets/info.png"
-		warnDialog = "./assets/warn.png"
-	} else {
-		iconPath = appDir + "/usr/share/icons/128x128/apps/key.png"
-		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
-		infoDialog = appDir + "/usr/share/icons/48x48/status/info.png"
-		warnDialog = appDir + "/usr/share/icons/48x48/status/warn.png"
-	}
+	iconPath := config.GetIconPath(config.ICON)
 	if file, err = os.Open(iconPath); err != nil {
 		panic(err)
 	}
@@ -71,24 +56,19 @@ func onReady() {
 			if code, err := totp.ReadTotpFromScreen(); err == nil {
 				if otp, err := totp.Import(code); err == nil {
 					if err := storage.SaveOTP(otp); err == nil {
-						notify.Notify(
-							"TOTP Warehouse",
-							"Notice",
-							fmt.Sprintf("%v added", otp),
-							infoDialog,
-						)
+						helpers.NotifyInfo(fmt.Sprintf("%v added", otp))
 						restart()
 
 					} else {
-						notifyError(err)
+						helpers.NotifyError(err)
 					}
 
 				} else {
-					notifyError(err)
+					helpers.NotifyError(err)
 				}
 
 			} else {
-				notifyError(err)
+				helpers.NotifyError(err)
 			}
 		case <-quitItem.ClickedCh:
 			systray.Quit()
@@ -105,12 +85,8 @@ func fillMenu() {
 			systray.AddSeparator()
 		}
 	} else {
-		notifyError(err)
+		helpers.NotifyError(err)
 	}
-}
-
-func notifyError(err error) {
-	notify.Alert("TOTP Warehouse", "Error", err.Error(), errorDialog)
 }
 
 func dealWithGetToken(channel <-chan struct{}, key string) {
@@ -120,16 +96,11 @@ func dealWithGetToken(channel <-chan struct{}, key string) {
 			if otp, err := storage.RetrieveOTP(key); err == nil {
 				token := otp.Token()
 				if err := clipboard.WriteAll(token); err == nil {
-					notify.Notify(
-						"TOTP Warehouse",
-						"Notice",
-						fmt.Sprintf("%v copied to clipboard", token),
-						infoDialog,
-					)
+					helpers.NotifyInfo(fmt.Sprintf("%v copied to clipboard", token))
 				}
 
 			} else {
-				notifyError(err)
+				helpers.NotifyError(err)
 			}
 		}
 	}
@@ -143,7 +114,7 @@ func dealWithShow(channel <-chan struct{}, key string) {
 				totp.ShowOTP(otp)
 
 			} else {
-				notifyError(err)
+				helpers.NotifyError(err)
 			}
 		}
 	}
@@ -169,31 +140,19 @@ func dealWithRemove(channel <-chan struct{}, key string) {
 
 func remove(key string) {
 	if err := storage.DeleteOTP(key); err == nil {
-		notify.Notify(
-			"TOTP Warehouse",
-			"Notice",
-			fmt.Sprintf("%v removed", key),
-			infoDialog,
-		)
+		helpers.NotifyInfo(fmt.Sprintf("%v removed", key))
 		restart()
 
 	} else {
-		notifyError(err)
+		helpers.NotifyError(err)
 	}
 }
 
 func restart() {
 	systray.Quit()
-	exec.Command(os.Args[0], os.Args[1:]...).Start()
-	time.Sleep(2 * time.Second)
-	os.Exit(0)
+	helpers.Fork(nil)
 }
 
 func onExit() {
-	//notify.Notify(
-	//	"TOTP Warehouse",
-	//	"Warn",
-	//	"Exiting",
-	//	warnDialog,
-	//)
+	//helpers.NotifyWarn("Exiting")
 }

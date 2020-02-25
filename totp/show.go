@@ -6,29 +6,16 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/martinlindhe/notify"
+	"github.com/cacilhas/totp-warehouse/helpers"
 	qrcode "github.com/skip2/go-qrcode"
 )
-
-var (
-	errorDialog string
-)
-
-func init() {
-	appDir := os.Getenv("APPDIR")
-	if appDir == "" {
-		errorDialog = "./assets/error.png"
-	} else {
-		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
-	}
-}
 
 func ShowOTP(otp OTP) {
 	var file *os.File
 	var err error
 
 	if file, err = ioutil.TempFile(os.TempDir(), "*.png"); err != nil {
-		notifyError(err)
+		helpers.NotifyError(err)
 		return
 	}
 	filename := file.Name()
@@ -38,7 +25,7 @@ func ShowOTP(otp OTP) {
 	}()
 
 	if err = qrcode.WriteFile(otp.String(), qrcode.High, 512, filename); err != nil {
-		notifyError(err)
+		helpers.NotifyError(err)
 		return
 	}
 
@@ -50,13 +37,9 @@ func ShowOTP(otp OTP) {
 	}
 
 	if err = cmd.Start(); err != nil {
-		notifyError(err)
+		helpers.NotifyError(err)
 		return
 	}
 
 	cmd.Wait()
-}
-
-func notifyError(err error) {
-	notify.Alert("TOTP Warehouse", "Error", err.Error(), errorDialog)
 }

@@ -2,19 +2,18 @@ package main
 
 import (
 	"os"
-	"os/exec"
 	"path"
-	"time"
 
 	"github.com/cacilhas/totp-warehouse/config"
 	"github.com/cacilhas/totp-warehouse/gui"
+	"github.com/cacilhas/totp-warehouse/helpers"
 )
 
 func main() {
 	if search(os.Args, "-nofork") {
 		start()
 	} else {
-		fork()
+		helpers.Fork(append(os.Args, "-nofork"))
 	}
 }
 
@@ -28,13 +27,6 @@ func start() {
 	}
 	defer os.Remove(lockname)
 	gui.Start()
-}
-
-func fork() {
-	args := append(os.Args[1:], "-nofork")
-	exec.Command(os.Args[0], args...).Start()
-	time.Sleep(2 * time.Second)
-	os.Exit(0) // force quit
 }
 
 func search(args []string, element string) bool {

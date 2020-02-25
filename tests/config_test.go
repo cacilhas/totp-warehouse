@@ -27,4 +27,34 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("unexpected config directory %v", got)
 		}
 	})
+
+	t.Run("GetIconPath", func(t *testing.T) {
+		t.Run("ICON", func(t *testing.T) {
+			expected := "./assets/key.png"
+			if got := config.GetIconPath(config.ICON); got != expected {
+				t.Fatalf("expected %v, got %v", expected, got)
+			}
+		})
+
+		t.Run("ERROR", func(t *testing.T) {
+			expected := "./assets/error.png"
+			if got := config.GetIconPath(config.ERROR); got != expected {
+				t.Fatalf("expected %v, got %v", expected, got)
+			}
+		})
+
+		t.Run("INFO", func(t *testing.T) {
+			expected := "./assets/info.png"
+			if got := config.GetIconPath(config.INFO); got != expected {
+				t.Fatalf("expected %v, got %v", expected, got)
+			}
+		})
+
+		t.Run("WARN", func(t *testing.T) {
+			expected := "./assets/warn.png"
+			if got := config.GetIconPath(config.WARN); got != expected {
+				t.Fatalf("expected %v, got %v", expected, got)
+			}
+		})
+	})
 }
