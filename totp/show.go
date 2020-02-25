@@ -53,6 +53,8 @@ func ShowOTP(otp OTP) {
 		notifyError(err)
 		return
 	}
+
+	cmd.Wait()
 }
 
 func notifyError(err error) {
