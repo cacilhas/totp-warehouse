@@ -28,7 +28,7 @@ var (
 
 const (
 	// ICON is the application icon path index
-	ICON = iota
+	ICON Icon = iota
 	// ERROR is the error dialog icon path index
 	ERROR
 	// INFO is the information dialog icon path index
