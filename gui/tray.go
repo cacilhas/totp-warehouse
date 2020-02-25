@@ -9,6 +9,7 @@ import (
 	"os/exec"
 
 	"github.com/atotto/clipboard"
+	"github.com/cacilhas/totp-warehouse/config"
 	"github.com/cacilhas/totp-warehouse/helpers"
 	"github.com/cacilhas/totp-warehouse/storage"
 	"github.com/cacilhas/totp-warehouse/totp"
@@ -17,28 +18,13 @@ import (
 )
 
 var (
-	icon        image.Image
-	errorDialog string
-	infoDialog  string
-	warnDialog  string
+	icon image.Image
 )
 
 func init() {
-	var iconPath string
 	var file *os.File
 	var err error
-	appDir := os.Getenv("APPDIR")
-	if appDir == "" {
-		iconPath = "./assets/key.png"
-		errorDialog = "./assets/error.png"
-		infoDialog = "./assets/info.png"
-		warnDialog = "./assets/warn.png"
-	} else {
-		iconPath = appDir + "/usr/share/icons/128x128/apps/key.png"
-		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
-		infoDialog = appDir + "/usr/share/icons/48x48/status/info.png"
-		warnDialog = appDir + "/usr/share/icons/48x48/status/warn.png"
-	}
+	iconPath := config.GetIconPath(config.ICON)
 	if file, err = os.Open(iconPath); err != nil {
 		panic(err)
 	}
@@ -75,7 +61,7 @@ func onReady() {
 							"TOTP Warehouse",
 							"Notice",
 							fmt.Sprintf("%v added", otp),
-							infoDialog,
+							config.GetIconPath(config.INFO),
 						)
 						restart()
 
@@ -110,7 +96,7 @@ func fillMenu() {
 }
 
 func notifyError(err error) {
-	notify.Alert("TOTP Warehouse", "Error", err.Error(), errorDialog)
+	notify.Alert("TOTP Warehouse", "Error", err.Error(), config.GetIconPath(config.ERROR))
 }
 
 func dealWithGetToken(channel <-chan struct{}, key string) {
@@ -124,7 +110,7 @@ func dealWithGetToken(channel <-chan struct{}, key string) {
 						"TOTP Warehouse",
 						"Notice",
 						fmt.Sprintf("%v copied to clipboard", token),
-						infoDialog,
+						config.GetIconPath(config.INFO),
 					)
 				}
 
@@ -173,7 +159,7 @@ func remove(key string) {
 			"TOTP Warehouse",
 			"Notice",
 			fmt.Sprintf("%v removed", key),
-			infoDialog,
+			config.GetIconPath(config.INFO),
 		)
 		restart()
 

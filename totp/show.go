@@ -6,22 +6,10 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/cacilhas/totp-warehouse/config"
 	"github.com/martinlindhe/notify"
 	qrcode "github.com/skip2/go-qrcode"
 )
-
-var (
-	errorDialog string
-)
-
-func init() {
-	appDir := os.Getenv("APPDIR")
-	if appDir == "" {
-		errorDialog = "./assets/error.png"
-	} else {
-		errorDialog = appDir + "/usr/share/icons/48x48/status/error.png"
-	}
-}
 
 func ShowOTP(otp OTP) {
 	var file *os.File
@@ -58,5 +46,5 @@ func ShowOTP(otp OTP) {
 }
 
 func notifyError(err error) {
-	notify.Alert("TOTP Warehouse", "Error", err.Error(), errorDialog)
+	notify.Alert("TOTP Warehouse", "Error", err.Error(), config.GetIconPath(config.ERROR))
 }
