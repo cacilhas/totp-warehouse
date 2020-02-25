@@ -95,7 +95,7 @@ func (pogo pogo) Secret() string {
 
 func (pogo pogo) Token() string {
 	totp := otp.TOTP{
-		Secret:         pogo.secret,
+		Secret:         strings.ToUpper(pogo.secret),
 		Length:         pogo.length,
 		IsBase32Secret: true,
 	}
