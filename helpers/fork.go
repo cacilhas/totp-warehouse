@@ -11,6 +11,6 @@ func Fork(args []string) {
 		args = os.Args
 	}
 	exec.Command(args[0], args[1:]...).Start()
-	time.Sleep(2 * time.Second)
+	time.Sleep(200 * time.Millisecond)
 	os.Exit(0) // force quit
 }
